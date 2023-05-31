@@ -7,7 +7,7 @@ using System.Net;
 
 namespace RedMango_API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/ShoppingCart")]
     [ApiController]
     public class ShoppingCartController : ControllerBase
     {
@@ -25,15 +25,16 @@ namespace RedMango_API.Controllers
         {
             try
             {
+                ShoppingCart shoppingCart;
                 if (string.IsNullOrEmpty(userId))
                 {
-                    _response.IsSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-
-                    return BadRequest(_response);
+                    shoppingCart = new();
                 }
-                ShoppingCart shoppingCart = _db.ShoppingCarts.Include(u => u.CartItems).ThenInclude(u => u.MenuItem)
-                    .FirstOrDefault(u => u.UserId == userId);
+                else
+                {
+                    shoppingCart = _db.ShoppingCarts.Include(u => u.CartItems).ThenInclude(u => u.MenuItem)
+                        .FirstOrDefault(u => u.UserId == userId);
+                }
 
                 if (shoppingCart.CartItems != null && shoppingCart.CartItems.Count() > 0)
                 {
