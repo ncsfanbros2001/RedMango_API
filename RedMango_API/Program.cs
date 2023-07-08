@@ -19,6 +19,7 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 
 builder.Services.AddSingleton(u => new BlobServiceClient(builder.Configuration
     .GetConnectionString("StorageAccount")));
+
 builder.Services.AddSingleton<IBlobService, BlobService>();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<DatabaseContext>();

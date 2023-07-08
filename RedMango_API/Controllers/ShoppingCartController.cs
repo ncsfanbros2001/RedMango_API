@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RedMango_API.Data;
 using RedMango_API.Models;
@@ -17,7 +16,7 @@ namespace RedMango_API.Controllers
         public ShoppingCartController(DatabaseContext db)
         {
             _db = db;
-            _response = new API_Response();
+            _response = new();
         }
 
         [HttpGet]
@@ -60,6 +59,20 @@ namespace RedMango_API.Controllers
         public async Task<ActionResult<API_Response>> AddOrUpdateItemInCart(string userId, int menuItemId,
             int updateQuantityBy)
         {
+            // Shopping cart will have one entry per user id, even if a user has many items in cart.
+            // Cart items will have all the items in shopping cart for a user
+            // updatequantityby will have count by with an items quantity needs to be updated
+            // if it is -1 that means we have lower a count if it is 5 it means we have to add 5 count to existing count.
+            // if updatequantityby by is 0, item will be removed
+
+
+            // when a user adds a new item to a new shopping cart for the first time
+            // when a user adds a new item to an existing shopping cart (basically user has other items in cart)
+            // when a user updates an existing item count
+            // when a user removes an existing item
+
+
+
             ShoppingCart shoppingCart = _db.ShoppingCarts.Include(u => u.CartItems)
                 .FirstOrDefault(u => u.UserId == userId);
             MenuItem menuItem = _db.MenuItems.FirstOrDefault(u => u.Id == menuItemId);

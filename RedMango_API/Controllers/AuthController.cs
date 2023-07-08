@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using RedMango_API.Data;
 using RedMango_API.Models;
 using RedMango_API.Models.DTO;
-using RedMango_API.Services;
 using RedMango_API.Utilities;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
@@ -64,6 +62,7 @@ namespace RedMango_API.Controllers
                 if (result.Succeeded)
                 {
                     if (!_roleManager.RoleExistsAsync(StaticDetail.AdminRole).GetAwaiter().GetResult())
+                    // Create "admin" and "customer" role if doesn't exist
                     {
                         await _roleManager.CreateAsync(new IdentityRole(StaticDetail.AdminRole));
                         await _roleManager.CreateAsync(new IdentityRole(StaticDetail.CustomerRole));
@@ -93,6 +92,11 @@ namespace RedMango_API.Controllers
             _response.ErrorMessages.Add("Error While Registering");
             return BadRequest(_response);
         }
+
+
+
+
+
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO model)
