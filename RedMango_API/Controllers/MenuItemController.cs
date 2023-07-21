@@ -1,13 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using RedMango_API.Data;
 using RedMango_API.Models;
 using RedMango_API.Models.DTO;
 using RedMango_API.Services;
 using RedMango_API.Utilities;
 using System.Net;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace RedMango_API.Controllers
 {
@@ -27,7 +25,7 @@ namespace RedMango_API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetMenuItems()
+        public async Task<IActionResult> GetMenuItems() // Get all menu item in database
         {
             _response.Result = _db.MenuItems;
             _response.StatusCode = HttpStatusCode.OK;
@@ -61,6 +59,7 @@ namespace RedMango_API.Controllers
         }
 
         [HttpPost]
+        //[Authorize(Roles = StaticDetail.AdminRole)]
         public async Task<ActionResult<API_Response>> CreateMenuItem([FromForm] MenuItemCreateDTO menuItemCreateDTO)
         {
             try
@@ -110,6 +109,7 @@ namespace RedMango_API.Controllers
         }
 
         [HttpPut("{id:int}")]
+        //[Authorize(Roles = StaticDetail.AdminRole)]
         public async Task<ActionResult<API_Response>> UpdateMenuItem(int id,
             [FromForm] MenuItemUpdateDTO menuItemUpdateDTO)
         {
@@ -117,16 +117,16 @@ namespace RedMango_API.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    if (menuItemUpdateDTO == null || id != menuItemUpdateDTO.Id)
+                    if (menuItemUpdateDTO == null || id != menuItemUpdateDTO.Id) // Null DTO or ID not exist
                     {
                         _response.StatusCode = HttpStatusCode.BadRequest;
                         _response.IsSuccess = false;
                         return BadRequest();
                     }
 
-                    MenuItem menuItemFromDb = await _db.MenuItems.FindAsync(id);
+                    MenuItem menuItemFromDb = await _db.MenuItems.FindAsync(id); // Find Menu Item
 
-                    if (menuItemFromDb == null)
+                    if (menuItemFromDb == null) // Item not exist
                     {
                         _response.StatusCode = HttpStatusCode.BadRequest;
                         _response.IsSuccess = false;
@@ -170,6 +170,7 @@ namespace RedMango_API.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        //[Authorize(Roles = StaticDetail.AdminRole)]
         public async Task<ActionResult<API_Response>> DeleteMenuItem(int id)
         {
             try
@@ -200,7 +201,7 @@ namespace RedMango_API.Controllers
                 _db.SaveChanges();
                 _response.StatusCode = HttpStatusCode.NoContent;
 
-                return Ok(_response); 
+                return Ok(_response);
             }
             catch (Exception ex)
             {

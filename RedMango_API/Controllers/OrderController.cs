@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using RedMango_API.Data;
 using RedMango_API.Models;
 using RedMango_API.Models.DTO;
-using RedMango_API.Services;
 using RedMango_API.Utilities;
 using System.Net;
+using System.Text.Json;
 
 namespace RedMango_API.Controllers
 {
@@ -23,23 +24,45 @@ namespace RedMango_API.Controllers
             _response = new API_Response();
         }
 
+        //[Authorize]
         [HttpGet]
-        public async Task<ActionResult<API_Response>> GetOrders(string? userId)
+        public async Task<ActionResult<API_Response>> GetOrders(string? userId, string searchString,
+            string status, int pageNumber = 1, int pageSize = 5)
         {
             try
             {
-                var orderHeaders = _db.OrderHeaders.Include(u => u.OrderDetails).ThenInclude(u => u.MenuItem)
+                IEnumerable<OrderHeader> orderHeaders = _db.OrderHeaders.Include(u => u.OrderDetails)
+                    .ThenInclude(u => u.MenuItem)
                     .OrderByDescending(u => u.OrderHeaderId);
 
                 if (!string.IsNullOrEmpty(userId))
                 {
-                    _response.Result = orderHeaders.Where(u => u.ApplicationUserId == userId);
+                    orderHeaders = orderHeaders.Where(u => u.ApplicationUserId == userId);
                 }
-                else
+                
+                if (!string.IsNullOrEmpty(searchString))
                 {
-                    _response.Result = orderHeaders;
+                    orderHeaders = orderHeaders.Where(
+                        u => u.PickupPhoneNumber.ToLower().Contains(searchString.ToLower()) 
+                        || u.PickupEmail.ToLower().Contains(searchString.ToLower()) 
+                        || u.PickupName.ToLower().Contains(searchString.ToLower()));
                 }
 
+                if (!string.IsNullOrEmpty(status))
+                {
+                    orderHeaders = orderHeaders.Where(u => u.Status.ToLower() == status.ToLower());
+                }
+
+                Pagination pagination = new()
+                {
+                    CurrentPage = pageNumber,
+                    PageSize = pageSize,
+                    TotalRecords = orderHeaders.Count()
+                };
+
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+
+                _response.Result = orderHeaders.Skip((pageNumber - 1) * pageSize).Take(pageSize);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }

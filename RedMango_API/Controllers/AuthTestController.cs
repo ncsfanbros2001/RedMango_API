@@ -13,14 +13,14 @@ namespace RedMango_API.Controllers
         [Authorize]
         public async Task<ActionResult<string>> GetSomething()
         {
-            return "UR Authenticated";
+            return "U R Authenticated";
         }
 
         [HttpGet("{id:int}")]
         [Authorize(Roles = StaticDetail.AdminRole)]
         public async Task<ActionResult<string>> GetSomething(int someIntValue)
         {
-            return "UR Authorized with the role of Admin";
+            return "U R Authorized with the role of Admin";
         }
     }
 }

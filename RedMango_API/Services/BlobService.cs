@@ -10,6 +10,7 @@ namespace RedMango_API.Services
         {
             _blobServiceClient = blobServiceClient;
         }
+
         public async Task<bool> DeleteBlob(string blobName, string containerName)
         {
             BlobContainerClient blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
